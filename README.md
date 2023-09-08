@@ -10,7 +10,7 @@ s3 = S3("eu-west-1")
 ``
 
 ``
-message_content=b'Hello World!"
+message_content=b'Hello World!'
 ``
 
 ``
