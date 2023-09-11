@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 [project]
 name = "simple_aws_wrapper"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     { name="Andrea Trupia", email="andrea.trupia.96@gmail.com"}
 ]
