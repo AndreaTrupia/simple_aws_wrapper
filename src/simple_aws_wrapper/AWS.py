@@ -4,6 +4,8 @@ from typing import List
 
 import boto3
 
+from src.simple_aws_wrapper.enums import services
+
 
 class GenericException(Exception):
     """
@@ -69,7 +71,7 @@ class S3:
         :param object_key: objectkey per identificare l'oggetto all'interno del bucket
         :return: bool True se l'upload è andato OK, False altrimenti
         """
-        s3 = AWS.get_client("s3", self.region_name, self.endpoint_url)
+        s3 = AWS.get_client(services.S3, self.region_name, self.endpoint_url)
         try:
             s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
             return True
@@ -92,12 +94,12 @@ class DynamoDB:
         try:
             if self.endpoint_url and self.endpoint_url != "":
                 dynamodb_table = AWS.get_resource(
-                    "dynamodb", self.region_name, self.endpoint_url
+                    services.DYNAMO_DB, self.region_name, self.endpoint_url
                 ).Table(table_name)
             else:
-                dynamodb_table = AWS.get_resource("dynamodb", self.region_name).Table(
-                    table_name
-                )
+                dynamodb_table = AWS.get_resource(
+                    services.DYNAMO_DB, self.region_name
+                ).Table(table_name)
             return dynamodb_table
         except Exception as e:
             print(str(e))
@@ -116,12 +118,12 @@ class DynamoDB:
         """
         if self.endpoint_url and self.endpoint_url != "":
             dynamodb_table = AWS.get_resource(
-                "dynamodb", self.region_name, self.endpoint_url
+                services.DYNAMO_DB, self.region_name, self.endpoint_url
             ).Table(table_name)
         else:
-            dynamodb_table = AWS.get_resource("dynamodb", self.region_name).Table(
-                table_name
-            )
+            dynamodb_table = AWS.get_resource(
+                services.DYNAMO_DB, self.region_name
+            ).Table(table_name)
         try:
             dynamodb_table.put_item(Item=item)
             return True
@@ -177,7 +179,7 @@ class SQS:
         """
         if isinstance(message_body, dict):
             message_body = str(message_body)
-        sqs = AWS.get_client("sqs", self.region_name, self.endpoint_url)
+        sqs = AWS.get_client(services.SQS, self.region_name, self.endpoint_url)
         try:
             queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
             sqs.send_message(
@@ -207,7 +209,7 @@ class ParameterStore:
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
         output_dict: dict = {}
-        ssm = AWS.get_client("ssm", self.region_name, self.endpoint_url)
+        ssm = AWS.get_client(services.SSM, self.region_name, self.endpoint_url)
         for parameter in parameters_list:
             try:
                 output_dict[parameter] = ssm.get_parameters(
