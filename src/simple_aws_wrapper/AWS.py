@@ -3,15 +3,20 @@ from __future__ import annotations
 import boto3
 
 
+class GenericException(Exception):
+    """
+    Eccezione generica
+    """
+    ...
+
+
 class AWS:
     """
     Implementazione generica delle API di AWS per manipolare risorse in cloud.
     """
 
     @staticmethod
-    def get_client(
-        service_name: str, region_name: str, endpoint_url: str | None = None
-    ):
+    def get_client(service_name: str, region_name: str, endpoint_url: str | None = None):
         """
         Funzione per instaurare una sessione Boto3. Restituisce il session client relativo al servizio
         :param service_name: servizio con cui instaurare una connessione (es. "s3" o "dynamodb")
@@ -21,15 +26,11 @@ class AWS:
         """
         session = boto3.Session()
         if endpoint_url:
-            return session.client(
-                service_name, region_name=region_name, endpoint_url=endpoint_url
-            )
+            return session.client(service_name, region_name=region_name, endpoint_url=endpoint_url)
         return session.client(service_name, region_name=region_name)
 
     @staticmethod
-    def get_resource(
-        service_name: str, region_name: str, endpoint_url: str | None = None
-    ):
+    def get_resource(service_name: str, region_name: str, endpoint_url: str | None = None):
         """
         Funzione per prendere una risorsa aws
         :param service_name: nome servizio (ad esempio "dynamodb")
@@ -51,17 +52,21 @@ class S3:
         self.region_name = region_name
         self.endpoint_url = endpoint_url
 
-    def put_object(self, body: bytes, bucket_name: str, object_key: str):
+    def put_object(self, body: bytes, bucket_name: str, object_key: str) -> bool:
         """
         Funzione per inserire un oggetto all'interno di un bucket
         :param body: contenuto del file codificato in byte
         :param bucket_name: nome del buket su cui effettuare l'upload
         :param object_key: objectkey per identificare l'oggetto all'interno del bucket
-        :return: None
+        :return: bool True se l'upload è andato OK, False altrimenti
         """
         s3 = AWS.get_client("s3", self.region_name, self.endpoint_url)
-        s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
-
+        try:
+            s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
 
 class DynamoDB:
     """
@@ -72,7 +77,7 @@ class DynamoDB:
         self.region_name = region_name
         self.endpoint_url = endpoint_url
 
-    def put_item(self, table_name: str, item: dict):
+    def put_item(self, table_name: str, item: dict) -> bool:
         """
         Funzione per inserire una enry all'interno di una tabella
         :param table_name: nome della tabella in cui effettuare l'inserimento
@@ -80,14 +85,15 @@ class DynamoDB:
         :return: None
         """
         if self.endpoint_url and self.endpoint_url != "":
-            dynamodb_table = AWS.get_resource(
-                "dynamodb", self.region_name, self.endpoint_url
-            ).Table(table_name)
+            dynamodb_table = AWS.get_resource("dynamodb", self.region_name, self.endpoint_url).Table(table_name)
         else:
-            dynamodb_table = AWS.get_resource("dynamodb", self.region_name).Table(
-                table_name
-            )
-        dynamodb_table.put_item(Item=item)
+            dynamodb_table = AWS.get_resource("dynamodb", self.region_name).Table(table_name)
+        try:
+            dynamodb_table.put_item(Item=item)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
 
 
 class SQS:
@@ -114,7 +120,7 @@ class SQS:
             output_dict[k] = kwargs[k]
         return output_dict
 
-    def send_message(self, queue_name: str, message_body: str | dict):
+    def send_message(self, queue_name: str, message_body: str | dict) -> bool:
         """
         Funzione per inviare un messaggio in una coda. Il messaggio può essere un dizionario o una stringa. Ambo i casi
         viene trattato come una stringa
@@ -125,12 +131,16 @@ class SQS:
         if isinstance(message_body, dict):
             message_body = str(message_body)
         sqs = AWS.get_client("sqs", self.region_name, self.endpoint_url)
-        queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
-        sqs.send_message(
-            QueueUrl=queue_url,
-            MessageBody=message_body,
-        )
-
+        try:
+            queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
+            sqs.send_message(
+                QueueUrl=queue_url,
+                MessageBody=message_body,
+            )
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
 
 class ParameterStore:
     """
@@ -151,7 +161,12 @@ class ParameterStore:
         output_dict: dict = {}
         ssm = AWS.get_client("ssm", self.region_name, self.endpoint_url)
         for parameter in parameters_list:
-            output_dict[parameter] = ssm.get_parameters(
-                Names=[parameter], WithDecryption=True
-            )["Parameters"][0]["Value"]
+            try:
+                output_dict[parameter] = ssm.get_parameters(Names=[parameter], WithDecryption=True)["Parameters"][0][
+                    "Value"
+                ]
+            except:
+                print(f"Errore nel recupero della chiave {parameter} dal parameter store")
+                output_dict[parameter] = ""
+                raise GenericException
         return output_dict
