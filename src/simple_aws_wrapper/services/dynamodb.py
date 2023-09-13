@@ -20,9 +20,9 @@ class DynamoDB:
         """
         try:
             if self.endpoint_url and self.endpoint_url != "":
-                dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(
-                    table_name
-                )
+                dynamodb_table = ResourceManager.get_resource(
+                    services.DYNAMO_DB, self.region_name, self.endpoint_url
+                ).Table(table_name)
             else:
                 dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
             return dynamodb_table
@@ -42,7 +42,9 @@ class DynamoDB:
         :return: None
         """
         if self.endpoint_url and self.endpoint_url != "":
-            dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(table_name)
+            dynamodb_table = ResourceManager.get_resource(
+                services.DYNAMO_DB, self.region_name, self.endpoint_url
+            ).Table(table_name)
         else:
             dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
         try:
