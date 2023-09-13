@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.AWS import AWS
+from src.simple_aws_wrapper.ResourceManager import ResourceManager
 from src.simple_aws_wrapper.enums import services
 from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
 
@@ -22,7 +22,7 @@ class ParameterStore:
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
         output_dict: dict = {}
-        ssm = AWS.get_client(services.SSM, self.region_name, self.endpoint_url)
+        ssm = ResourceManager.get_client(services.SSM, self.region_name, self.endpoint_url)
         for parameter in parameters_list:
             try:
                 output_dict[parameter] = ssm.get_parameters(Names=[parameter], WithDecryption=True)["Parameters"][0][

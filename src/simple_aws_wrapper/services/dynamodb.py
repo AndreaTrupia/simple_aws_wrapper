@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List
 
-from src.simple_aws_wrapper.AWS import AWS
+from src.simple_aws_wrapper.ResourceManager import ResourceManager
 from src.simple_aws_wrapper.enums import services
 from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
 
@@ -20,11 +20,11 @@ class DynamoDB:
         """
         try:
             if self.endpoint_url and self.endpoint_url != "":
-                dynamodb_table = AWS.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(
+                dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(
                     table_name
                 )
             else:
-                dynamodb_table = AWS.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
+                dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
             return dynamodb_table
         except Exception as e:
             print(str(e))
@@ -42,9 +42,9 @@ class DynamoDB:
         :return: None
         """
         if self.endpoint_url and self.endpoint_url != "":
-            dynamodb_table = AWS.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(table_name)
+            dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name, self.endpoint_url).Table(table_name)
         else:
-            dynamodb_table = AWS.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
+            dynamodb_table = ResourceManager.get_resource(services.DYNAMO_DB, self.region_name).Table(table_name)
         try:
             dynamodb_table.put_item(Item=item)
             return True

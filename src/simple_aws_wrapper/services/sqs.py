@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.AWS import AWS
+from src.simple_aws_wrapper.ResourceManager import ResourceManager
 from src.simple_aws_wrapper.enums import services
 from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
 
@@ -39,7 +39,7 @@ class SQS:
         """
         if isinstance(message_body, dict):
             message_body = str(message_body)
-        sqs = AWS.get_client(services.SQS, self.region_name, self.endpoint_url)
+        sqs = ResourceManager.get_client(services.SQS, self.region_name, self.endpoint_url)
         try:
             queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
             sqs.send_message(

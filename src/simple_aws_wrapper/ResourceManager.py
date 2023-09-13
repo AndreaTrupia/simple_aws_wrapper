@@ -3,7 +3,7 @@ from __future__ import annotations
 import boto3
 
 
-class AWS:
+class ResourceManager:
     """
     Implementazione generica delle API di AWS per manipolare risorse in cloud.
     """

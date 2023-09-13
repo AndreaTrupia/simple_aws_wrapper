@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.AWS import AWS
+from src.simple_aws_wrapper.ResourceManager import ResourceManager
 from src.simple_aws_wrapper.enums import services
 from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
 
@@ -22,7 +22,7 @@ class S3:
         :param object_key: objectkey per identificare l'oggetto all'interno del bucket
         :return: bool True se l'upload è andato OK, False altrimenti
         """
-        s3 = AWS.get_client(services.S3, self.region_name, self.endpoint_url)
+        s3 = ResourceManager.get_client(services.S3, self.region_name, self.endpoint_url)
         try:
             s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
             return True
