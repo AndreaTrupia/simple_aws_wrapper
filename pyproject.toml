@@ -3,7 +3,7 @@ requires = ["setuptools>=40.8.0"]
 build-backend = "setuptools.build_meta"
 [project]
 name = "simple_aws_wrapper"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
     { name="Andrea Trupia", email="andrea.trupia.96@gmail.com"}
 ]

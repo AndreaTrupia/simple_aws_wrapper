@@ -14,7 +14,7 @@ class S3:
         self.region_name = region_name
         self.endpoint_url = endpoint_url
 
-    def put_object(self, body: bytes, bucket_name: str, object_key: str) -> bool:
+    def put_object(self, body: bytes | str, bucket_name: str, object_key: str) -> bool:
         """
         Funzione per inserire un oggetto all'interno di un bucket
         :param body: contenuto del file codificato in byte
@@ -22,6 +22,8 @@ class S3:
         :param object_key: objectkey per identificare l'oggetto all'interno del bucket
         :return: bool True se l'upload è andato OK, False altrimenti
         """
+        if isinstance(body, str):
+            body = body.encode("utf-8")
         s3 = ResourceManager.get_client(services.S3, self.region_name, self.endpoint_url)
         try:
             s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
