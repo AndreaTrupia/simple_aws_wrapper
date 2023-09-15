@@ -3,6 +3,7 @@ from __future__ import annotations
 from src.simple_aws_wrapper.config import AWSConfig
 from src.simple_aws_wrapper.const import services
 from src.simple_aws_wrapper.exceptions.exceptions import GenericException, MissingConfigurationException
+from src.simple_aws_wrapper.resource_manager import ResourceManager
 
 
 class ParameterStore:
@@ -15,7 +16,10 @@ class ParameterStore:
             raise MissingConfigurationException
         self.region_name = AWSConfig().get_region_name()
         self.endpoint_url = AWSConfig().get_endpoint_url()
-
+        if self.endpoint_url and self.endpoint_url != "":
+            self.client = ResourceManager.get_client(services.SSM, self.region_name, self.endpoint_url)
+        else:
+            self.client = ResourceManager.get_client(services.SSM, self.region_name)
     def get_parameters_values_from_list(self, parameters_list: list) -> dict:
         """
         Funzione per il recupero dei valori dal servizio Parameter Store a partire dalla lista dei nomi dei parametri
@@ -24,10 +28,9 @@ class ParameterStore:
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
         output_dict: dict = {}
-        ssm = AWSConfig.get_client(services.SSM, self.region_name, self.endpoint_url)
         for parameter in parameters_list:
             try:
-                output_dict[parameter] = ssm.get_parameters(Names=[parameter], WithDecryption=True)["Parameters"][0][
+                output_dict[parameter] = self.client.get_parameters(Names=[parameter], WithDecryption=True)["Parameters"][0][
                     "Value"
                 ]
             except:

@@ -3,6 +3,7 @@ from __future__ import annotations
 from src.simple_aws_wrapper.config import AWSConfig
 from src.simple_aws_wrapper.const import services
 from src.simple_aws_wrapper.exceptions.exceptions import GenericException, MissingConfigurationException
+from src.simple_aws_wrapper.resource_manager import ResourceManager
 
 
 class SQS:
@@ -15,6 +16,10 @@ class SQS:
             raise MissingConfigurationException
         self.region_name = AWSConfig().get_region_name()
         self.endpoint_url = AWSConfig().get_endpoint_url()
+        if self.endpoint_url and self.endpoint_url != "":
+            self.client = ResourceManager.get_client(services.SQS, self.region_name, self.endpoint_url)
+        else:
+            self.client = ResourceManager.get_client(services.SQS, self.region_name)
 
     def create_message(self, **kwargs) -> dict:
         """
@@ -41,10 +46,9 @@ class SQS:
         """
         if isinstance(message_body, dict):
             message_body = str(message_body)
-        sqs = AWSConfig.get_client(services.SQS, self.region_name, self.endpoint_url)
         try:
-            queue_url = sqs.get_queue_url(QueueName=queue_name)["QueueUrl"]
-            sqs.send_message(
+            queue_url = self.client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+            self.client.send_message(
                 QueueUrl=queue_url,
                 MessageBody=message_body,
             )

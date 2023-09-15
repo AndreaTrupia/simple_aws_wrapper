@@ -8,6 +8,7 @@ from src.simple_aws_wrapper.exceptions.exceptions import (
     GenericException,
     MissingConfigurationException,
 )
+from src.simple_aws_wrapper.resource_manager import ResourceManager
 
 
 class DynamoDB:
@@ -20,6 +21,10 @@ class DynamoDB:
             raise MissingConfigurationException
         self.region_name = AWSConfig().get_region_name()
         self.endpoint_url = AWSConfig().get_endpoint_url()
+        if self.endpoint_url and self.endpoint_url != "":
+            self.client = ResourceManager.get_resource(services.S3, self.region_name, self.endpoint_url)
+        else:
+            self.client = ResourceManager.get_resource(services.S3, self.region_name)
 
     def __get_table_resource(self, table_name: str):
         """
@@ -28,15 +33,7 @@ class DynamoDB:
         :return: dynamodb.Table
         """
         try:
-            if self.endpoint_url and self.endpoint_url != "":
-                dynamodb_table = AWSConfig.get_resource(
-                    services.DYNAMO_DB, self.region_name, self.endpoint_url
-                ).Table(table_name)
-            else:
-                dynamodb_table = AWSConfig.get_resource(
-                    services.DYNAMO_DB, self.region_name
-                ).Table(table_name)
-            return dynamodb_table
+            return self.client.Table(table_name)
         except Exception as e:
             print(str(e))
             raise GenericException
@@ -48,16 +45,8 @@ class DynamoDB:
         :param item: entry da inserire sotto forma di dizionario chiave-valore
         :return: None
         """
-        if self.endpoint_url and self.endpoint_url != "":
-            dynamodb_table = AWSConfig.get_resource(
-                services.DYNAMO_DB, self.region_name, self.endpoint_url
-            ).Table(table_name)
-        else:
-            dynamodb_table = AWSConfig.get_resource(
-                services.DYNAMO_DB, self.region_name
-            ).Table(table_name)
         try:
-            dynamodb_table.put_item(Item=item)
+            self.__get_table_resource(table_name).put_item(Item=item)
             return True
         except Exception as e:
             print(str(e))
@@ -72,6 +61,32 @@ class DynamoDB:
         """
         try:
             return self.__get_table_resource(table_name).scan()
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def update_item(
+        self,
+        table_name: str,
+        key: dict,
+        update_expression: str,
+        expression_attribute_values: dict,
+    ) -> bool:
+        """
+        Funzione per aggiornare un elemento all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da aggiornare
+        :param update_expression: espressione di aggiornamento
+        :param expression_attribute_values: dizionario con i valori dei parametri
+        :return: Booleano che indica se l'operazione è andata a buon fine o meno
+        """
+        try:
+            self.__get_table_resource(table_name).update_item(
+                Key=key,
+                UpdateExpression=update_expression,
+                ExpressionAttributeValues=expression_attribute_values,
+            )
+            return True
         except Exception as e:
             print(str(e))
             raise GenericException
