@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import decimal
 from typing import List
 
 from src.simple_aws_wrapper.config import AWSConfig
@@ -22,9 +23,13 @@ class DynamoDB:
         self.region_name = AWSConfig().get_region_name()
         self.endpoint_url = AWSConfig().get_endpoint_url()
         if self.endpoint_url and self.endpoint_url != "":
-            self.client = ResourceManager.get_resource(services.S3, self.region_name, self.endpoint_url)
+            self.client = ResourceManager.get_resource(
+                services.DYNAMO_DB, self.region_name, self.endpoint_url
+            )
         else:
-            self.client = ResourceManager.get_resource(services.S3, self.region_name)
+            self.client = ResourceManager.get_resource(
+                services.DYNAMO_DB, self.region_name
+            )
 
     def __get_table_resource(self, table_name: str):
         """
@@ -34,6 +39,22 @@ class DynamoDB:
         """
         try:
             return self.client.Table(table_name)
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def get_record(self, table_name: str, key: dict):
+        """
+        Funzione per prelevare un record all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da prelevare
+        :return: Dizionario con i valori del record
+        """
+        try:
+            output = self.__get_table_resource(table_name).get_item(Key=key)
+            if "Item" not in output:
+                return None
+            return output
         except Exception as e:
             print(str(e))
             raise GenericException
@@ -86,6 +107,75 @@ class DynamoDB:
                 UpdateExpression=update_expression,
                 ExpressionAttributeValues=expression_attribute_values,
             )
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def get_item(self, table_name: str, key: dict) -> dict | None:
+        """
+        Funzione per prelevare un elemento all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da prelevare
+        :return: Dizionario con i valori del record
+        """
+        try:
+            return self.get_record(table_name, key)["Item"]
+        except TypeError as te:
+            print("Record not found")
+            return None
+        except KeyError as ke:
+            print("Record not found")
+            return None
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def get_item_value(
+        self, table_name: str, key: dict, attribute_name: str
+    ) -> decimal.Decimal | str | bool | None:
+        """
+        Funzione per prelevare un elemento all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da prelevare
+        :param attribute_name: nome dell'attributo da prelevare dal record estratto
+        :return: Dizionario con i valori del record
+        """
+        try:
+            return self.get_record(table_name, key)["Item"][attribute_name]
+        except TypeError as te:
+            print(str(te))
+            print("Record not found")
+            return None
+        except KeyError as ke:
+            print(f"Record has no attribute \"{attribute_name}\"")
+            return None
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def key_exists(self, table_name: str, key: dict) -> bool:
+        """
+        Funzione per verificare se un elemento esiste all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da verificare
+        :return: Booleano che indica se l'elemento esiste o meno
+        """
+        try:
+            return self.get_record(table_name, key)["Item"] is not None
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def delete_item(self, table_name: str, key: dict) -> bool:
+        """
+        Funzione per eliminare un elemento all'interno di una tabella
+        :param table_name: nome tabella
+        :param key: chiave del record da eliminare
+        :return: Booleano che indica se l'operazione Ã© andata a buon fine o meno
+        """
+        try:
+            self.__get_table_resource(table_name).delete_item(Key=key)
             return True
         except Exception as e:
             print(str(e))
