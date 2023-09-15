@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.ResourceManager import ResourceManager
-from src.simple_aws_wrapper.enums import services
-from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
+from src.simple_aws_wrapper.config import AWSConfig
+from src.simple_aws_wrapper.const import services
+from src.simple_aws_wrapper.exceptions.exceptions import GenericException, MissingConfigurationException
 
 
 class S3:
@@ -10,9 +10,11 @@ class S3:
     Classe per la gestione di bucket S3 su AWS
     """
 
-    def __init__(self, region_name: str, endpoint_url: str | None = None):
-        self.region_name = region_name
-        self.endpoint_url = endpoint_url
+    def __init__(self):
+        if not AWSConfig().is_configured():
+            raise MissingConfigurationException
+        self.region_name = AWSConfig().get_region_name()
+        self.endpoint_url = AWSConfig().get_endpoint_url()
 
     def put_object(self, body: bytes | str, bucket_name: str, object_key: str) -> bool:
         """
@@ -24,7 +26,7 @@ class S3:
         """
         if isinstance(body, str):
             body = body.encode("utf-8")
-        s3 = ResourceManager.get_client(services.S3, self.region_name, self.endpoint_url)
+        s3 = AWSConfig.get_client(services.S3, self.region_name, self.endpoint_url)
         try:
             s3.put_object(Body=body, Bucket=bucket_name, Key=object_key)
             return True

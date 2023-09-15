@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.ResourceManager import ResourceManager
-from src.simple_aws_wrapper.enums import services
-from src.simple_aws_wrapper.exceptions.generic_exception import GenericException
+from src.simple_aws_wrapper.config import AWSConfig
+from src.simple_aws_wrapper.const import services
+from src.simple_aws_wrapper.exceptions.exceptions import GenericException, MissingConfigurationException
 
 
 class ParameterStore:
@@ -10,9 +10,11 @@ class ParameterStore:
     Classe per la gestione del servizio ParameterStore di AWS
     """
 
-    def __init__(self, region_name: str, endpoint_url: str | None = None):
-        self.region_name = region_name
-        self.endpoint_url = endpoint_url
+    def __init__(self):
+        if not AWSConfig().is_configured():
+            raise MissingConfigurationException
+        self.region_name = AWSConfig().get_region_name()
+        self.endpoint_url = AWSConfig().get_endpoint_url()
 
     def get_parameters_values_from_list(self, parameters_list: list) -> dict:
         """
@@ -22,7 +24,7 @@ class ParameterStore:
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
         output_dict: dict = {}
-        ssm = ResourceManager.get_client(services.SSM, self.region_name, self.endpoint_url)
+        ssm = AWSConfig.get_client(services.SSM, self.region_name, self.endpoint_url)
         for parameter in parameters_list:
             try:
                 output_dict[parameter] = ssm.get_parameters(Names=[parameter], WithDecryption=True)["Parameters"][0][
