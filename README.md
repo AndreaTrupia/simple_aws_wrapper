@@ -2,11 +2,7 @@
 
 Example usage:<br>
 ``
-from src.simple_aws_wrapper import config
-``
-
-``
-from src.simple_aws_wrapper import config
+from src.simple_aws_wrapper.config import AWSConfig
 ``
 
 ``
@@ -14,19 +10,15 @@ from src.simple_aws_wrapper.const import regions
 ``
 
 ``
-from src.simple_aws_wrapper.const.regions import Region
-``
-
-``
 from src.simple_aws_wrapper.services.s3 import S3
 ``
 
 ``
-aws_config = config.AWSConfig()
+aws_config = AWSConfig()
 ``
 
 ``
-aws_config.set_region(Region(regions.EU_WEST_1))
+aws_config.set_region(regions.Region(regions.EU_WEST_1))
 ``
 
 ``
