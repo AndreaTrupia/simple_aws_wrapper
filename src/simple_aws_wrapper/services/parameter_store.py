@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from src.simple_aws_wrapper.config import AWSConfig
-from src.simple_aws_wrapper.const import services
-from src.simple_aws_wrapper.exceptions.exceptions import GenericException, MissingConfigurationException
-from src.simple_aws_wrapper.resource_manager import ResourceManager
+from config import AWSConfig
+from const import services
+from exceptions.exceptions import MissingConfigurationException, GenericException
+from resource_manager import ResourceManager
 
 
 class ParameterStore:

@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import boto3
-
-from src.simple_aws_wrapper.const.regions import Region
+from const.regions import Region
 
 
 class AWSConfig:
@@ -73,7 +71,3 @@ class AWSConfig:
         :return: regione utilizzata per il ResourceManager
         """
         return self.__region.get_region_name()
-
-
-
-

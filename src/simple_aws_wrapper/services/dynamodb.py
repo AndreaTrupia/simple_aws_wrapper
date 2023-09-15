@@ -3,13 +3,10 @@ from __future__ import annotations
 import decimal
 from typing import List
 
-from src.simple_aws_wrapper.config import AWSConfig
-from src.simple_aws_wrapper.const import services
-from src.simple_aws_wrapper.exceptions.exceptions import (
-    GenericException,
-    MissingConfigurationException,
-)
-from src.simple_aws_wrapper.resource_manager import ResourceManager
+from config import AWSConfig
+from const import services
+from exceptions.exceptions import MissingConfigurationException, GenericException
+from resource_manager import ResourceManager
 
 
 class DynamoDB:
@@ -87,11 +84,11 @@ class DynamoDB:
             raise GenericException
 
     def update_item(
-        self,
-        table_name: str,
-        key: dict,
-        update_expression: str,
-        expression_attribute_values: dict,
+            self,
+            table_name: str,
+            key: dict,
+            update_expression: str,
+            expression_attribute_values: dict,
     ) -> bool:
         """
         Funzione per aggiornare un elemento all'interno di una tabella
@@ -132,7 +129,7 @@ class DynamoDB:
             raise GenericException
 
     def get_item_value(
-        self, table_name: str, key: dict, attribute_name: str
+            self, table_name: str, key: dict, attribute_name: str
     ) -> decimal.Decimal | str | bool | None:
         """
         Funzione per prelevare un elemento all'interno di una tabella
@@ -148,7 +145,7 @@ class DynamoDB:
             print("Record not found")
             return None
         except KeyError as ke:
-            print(f"Record has no attribute \"{attribute_name}\"")
+            print(f'Record has no attribute "{attribute_name}"')
             return None
         except Exception as e:
             print(str(e))
@@ -177,6 +174,18 @@ class DynamoDB:
         try:
             self.__get_table_resource(table_name).delete_item(Key=key)
             return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def load(self, table_name: str):
+        """
+        Funzione per caricare la tabella
+        :param table_name: nome tabella
+        :return:
+        """
+        try:
+            return self.__get_table_resource(table_name).load()
         except Exception as e:
             print(str(e))
             raise GenericException
