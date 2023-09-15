@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from const.regions import Region
+from simple_aws_wrapper.const.regions import Region
 
 
 class AWSConfig:

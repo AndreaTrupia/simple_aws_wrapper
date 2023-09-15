@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from config import AWSConfig
-from const import services
-from exceptions.exceptions import MissingConfigurationException, GenericException
-from resource_manager import ResourceManager
+from simple_aws_wrapper.config import AWSConfig
+from simple_aws_wrapper.const import services
+from simple_aws_wrapper.exceptions.exceptions import MissingConfigurationException, GenericException
+from simple_aws_wrapper.resource_manager import ResourceManager
 
 
 class S3:
