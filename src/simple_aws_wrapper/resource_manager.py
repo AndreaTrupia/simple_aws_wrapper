@@ -40,3 +40,15 @@ class ResourceManager:
         if endpoint_url and endpoint_url != "":
             return boto3.resource(service_name, region_name, endpoint_url=endpoint_url)
         return boto3.resource(service_name, region_name)
+
+    @staticmethod
+    def get_global_client(service_name: str, endpoint_url: str | None = None):
+        """
+        Funzione per prendere un client global
+        :param service_name: nome servizio (ad esempio "dynamodb")
+        :param endpoint_url: eventuale endpoint a cui collegarsi
+        :return: client global
+        """
+        if endpoint_url and endpoint_url != "":
+            return boto3.client(service_name, endpoint_url=endpoint_url)
+        return boto3.client(service_name)

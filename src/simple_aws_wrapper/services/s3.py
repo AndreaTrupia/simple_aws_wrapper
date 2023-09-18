@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from simple_aws_wrapper.config import AWSConfig
-from simple_aws_wrapper.const import services
+from simple_aws_wrapper.const import services, regions
 from simple_aws_wrapper.exceptions.exceptions import (
     MissingConfigurationException,
     GenericException,
@@ -20,11 +20,9 @@ class S3:
         self.region_name = AWSConfig().get_region_name()
         self.endpoint_url = AWSConfig().get_endpoint_url()
         if self.endpoint_url and self.endpoint_url != "":
-            self.client = ResourceManager.get_client(
-                services.S3, self.region_name, self.endpoint_url
-            )
+            self.client = ResourceManager.get_global_client(services.S3, self.endpoint_url)
         else:
-            self.client = ResourceManager.get_client(services.S3, self.region_name)
+            self.client = ResourceManager.get_global_client(services.S3)
 
     def put_object(self, body: bytes | str, bucket_name: str, object_key: str) -> bool:
         """
@@ -72,11 +70,11 @@ class S3:
             raise GenericException
 
     def copy_object(
-        self,
-        bucket_name: str,
-        object_key: str,
-        destination_object_key: str,
-        destination_bucket_name: str | None = None,
+            self,
+            bucket_name: str,
+            object_key: str,
+            destination_object_key: str,
+            destination_bucket_name: str | None = None,
     ) -> bool:
         """
         Funzione per copiare un oggetto dal bucket in un altro
@@ -115,11 +113,11 @@ class S3:
             raise GenericException
 
     def move_object(
-        self,
-        bucket_name: str,
-        object_key: str,
-        destination_object_key: str,
-        destination_bucket_name: str | None = None,
+            self,
+            bucket_name: str,
+            object_key: str,
+            destination_object_key: str,
+            destination_bucket_name: str | None = None,
     ) -> bool:
         """
         Funzione per spostare un oggetto da un bucket a un altro
@@ -137,6 +135,35 @@ class S3:
                 bucket_name, object_key, destination_object_key, destination_bucket_name
             )
             self.delete_object(bucket_name, object_key)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def create_bucket(self, bucket_name: str, **kwargs):
+        """
+        Funzione per creare un bucket
+        :param bucket_name: nome del bucket
+        :param kwargs: argomenti variabili
+        :return: True se la creazione è andata bene
+        """
+        try:
+            if self.region_name != regions.US_EAST_1:
+                kwargs["CreateBucketConfiguration"] = {"LocationConstraint": self.region_name}
+            self.client.create_bucket(Bucket=bucket_name, **kwargs)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def delete_bucket(self, bucket_name: str):
+        """
+        Funzione per eliminare un bucket
+        :param bucket_name: nome del bucket
+        :return: True se la creazione Ã© andata bene
+        """
+        try:
+            self.client.delete_bucket(Bucket=bucket_name)
             return True
         except Exception as e:
             print(str(e))
