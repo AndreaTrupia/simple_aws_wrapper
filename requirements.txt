@@ -1,3 +1,15 @@
 boto3==1.26.126
 black
 virtualenv
+localstack
+flask
+xmltodict
+moto
+cbor2
+boto
+jsonpatch
+quart
+flask_cors
+apispec
+openapi_spec_validator
+localstack_client
