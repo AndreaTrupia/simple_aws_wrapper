@@ -1,8 +1,6 @@
 import random
 import unittest
 
-from localstack.utils.testutil import start_http_server
-
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import regions
 from simple_aws_wrapper.const.regions import Region
@@ -11,10 +9,8 @@ from simple_aws_wrapper.services.s3 import S3
 
 class TestS3(unittest.TestCase):
     def setUp(self) -> None:
-        test_port = 57305
-        start_http_server(test_port=test_port)
         AWSConfig().set_region(Region(regions.EU_WEST_1)).set_endpoint_url(
-            f"http://localhost:{test_port}"
+            "http://localhost:4566"
         )
         self.s3 = S3()
         self.bucket_name = f"test-bucket-{random.randint(0, 1000)}"
