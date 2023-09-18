@@ -116,8 +116,8 @@ class S3:
 
     def move_object(
         self,
-        object_key: str,
         bucket_name: str,
+        object_key: str,
         destination_object_key: str,
         destination_bucket_name: str | None = None,
     ) -> bool:
