@@ -74,12 +74,10 @@ class ResourceManager:
         :param endpoint_url: eventuale endpoint a cui collegarsi
         :return: client global
         """
-        if endpoint_url and endpoint_url != "":
-            return boto3.client(
-                service_name,
-                endpoint_url=endpoint_url,
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key,
-                aws_session_token=aws_session_token,
-            )
-        return boto3.client(service_name)
+        return boto3.client(
+            service_name,
+            endpoint_url=endpoint_url,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
