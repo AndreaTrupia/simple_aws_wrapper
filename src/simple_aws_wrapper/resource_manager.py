@@ -10,7 +10,12 @@ class ResourceManager:
 
     @staticmethod
     def get_client(
-        service_name: str, region_name: str, endpoint_url: str | None = None
+        service_name: str,
+        region_name: str,
+        endpoint_url: str | None = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
     ):
         """
         Funzione per instaurare una sessione Boto3. Restituisce il session client relativo al servizio
@@ -20,15 +25,23 @@ class ResourceManager:
         :return: botocore.client
         """
         session = boto3.Session()
-        if endpoint_url:
-            return session.client(
-                service_name, region_name=region_name, endpoint_url=endpoint_url
-            )
-        return session.client(service_name, region_name=region_name)
+        return session.client(
+            service_name,
+            region_name=region_name,
+            endpoint_url=endpoint_url,
+            aws_session_token=aws_session_token,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+        )
 
     @staticmethod
     def get_resource(
-        service_name: str, region_name: str, endpoint_url: str | None = None
+        service_name: str,
+        region_name: str,
+        endpoint_url: str | None = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
     ):
         """
         Funzione per prendere una risorsa aws
@@ -37,12 +50,24 @@ class ResourceManager:
         :param endpoint_url: eventuale endpoint a cui collegarsi
         :return: risorsa aws
         """
-        if endpoint_url and endpoint_url != "":
-            return boto3.resource(service_name, region_name, endpoint_url=endpoint_url)
-        return boto3.resource(service_name, region_name)
+        return boto3.resource(
+            service_name,
+            region_name,
+            endpoint_url=endpoint_url,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
 
     @staticmethod
-    def get_global_client(service_name: str, endpoint_url: str | None = None):
+    def get_global_client(
+        service_name: str,
+        endpoint_url: str | None = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        region_name = None
+    ):
         """
         Funzione per prendere un client global
         :param service_name: nome servizio (ad esempio "dynamodb")
@@ -50,5 +75,11 @@ class ResourceManager:
         :return: client global
         """
         if endpoint_url and endpoint_url != "":
-            return boto3.client(service_name, endpoint_url=endpoint_url)
+            return boto3.client(
+                service_name,
+                endpoint_url=endpoint_url,
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                aws_session_token=aws_session_token,
+            )
         return boto3.client(service_name)

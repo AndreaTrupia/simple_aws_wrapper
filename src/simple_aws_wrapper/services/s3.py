@@ -17,12 +17,10 @@ class S3:
     def __init__(self):
         if not AWSConfig().is_configured():
             raise MissingConfigurationException
+        self.client = ResourceManager.get_global_client(
+            services.S3, **AWSConfig().to_dict()
+        )
         self.region_name = AWSConfig().get_region_name()
-        self.endpoint_url = AWSConfig().get_endpoint_url()
-        if self.endpoint_url and self.endpoint_url != "":
-            self.client = ResourceManager.get_global_client(services.S3, self.endpoint_url)
-        else:
-            self.client = ResourceManager.get_global_client(services.S3)
 
     def put_object(self, body: bytes | str, bucket_name: str, object_key: str) -> bool:
         """
@@ -70,11 +68,11 @@ class S3:
             raise GenericException
 
     def copy_object(
-            self,
-            bucket_name: str,
-            object_key: str,
-            destination_object_key: str,
-            destination_bucket_name: str | None = None,
+        self,
+        bucket_name: str,
+        object_key: str,
+        destination_object_key: str,
+        destination_bucket_name: str | None = None,
     ) -> bool:
         """
         Funzione per copiare un oggetto dal bucket in un altro
@@ -113,11 +111,11 @@ class S3:
             raise GenericException
 
     def move_object(
-            self,
-            bucket_name: str,
-            object_key: str,
-            destination_object_key: str,
-            destination_bucket_name: str | None = None,
+        self,
+        bucket_name: str,
+        object_key: str,
+        destination_object_key: str,
+        destination_bucket_name: str | None = None,
     ) -> bool:
         """
         Funzione per spostare un oggetto da un bucket a un altro
@@ -149,7 +147,9 @@ class S3:
         """
         try:
             if self.region_name != regions.US_EAST_1:
-                kwargs["CreateBucketConfiguration"] = {"LocationConstraint": self.region_name}
+                kwargs["CreateBucketConfiguration"] = {
+                    "LocationConstraint": self.region_name
+                }
             self.client.create_bucket(Bucket=bucket_name, **kwargs)
             return True
         except Exception as e:

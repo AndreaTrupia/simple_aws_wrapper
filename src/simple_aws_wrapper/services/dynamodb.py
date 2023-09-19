@@ -5,7 +5,10 @@ from typing import List
 
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import services
-from simple_aws_wrapper.exceptions.exceptions import MissingConfigurationException, GenericException
+from simple_aws_wrapper.exceptions.exceptions import (
+    MissingConfigurationException,
+    GenericException,
+)
 from simple_aws_wrapper.resource_manager import ResourceManager
 
 
@@ -17,16 +20,9 @@ class DynamoDB:
     def __init__(self):
         if not AWSConfig().is_configured():
             raise MissingConfigurationException
-        self.region_name = AWSConfig().get_region_name()
-        self.endpoint_url = AWSConfig().get_endpoint_url()
-        if self.endpoint_url and self.endpoint_url != "":
-            self.client = ResourceManager.get_resource(
-                services.DYNAMO_DB, self.region_name, self.endpoint_url
-            )
-        else:
-            self.client = ResourceManager.get_resource(
-                services.DYNAMO_DB, self.region_name
-            )
+        self.client = ResourceManager.get_resource(
+            services.DYNAMO_DB, **AWSConfig().to_dict()
+        )
 
     def __get_table_resource(self, table_name: str):
         """
@@ -84,11 +80,11 @@ class DynamoDB:
             raise GenericException
 
     def update_item(
-            self,
-            table_name: str,
-            key: dict,
-            update_expression: str,
-            expression_attribute_values: dict,
+        self,
+        table_name: str,
+        key: dict,
+        update_expression: str,
+        expression_attribute_values: dict,
     ) -> bool:
         """
         Funzione per aggiornare un elemento all'interno di una tabella
@@ -129,7 +125,7 @@ class DynamoDB:
             raise GenericException
 
     def get_item_value(
-            self, table_name: str, key: dict, attribute_name: str
+        self, table_name: str, key: dict, attribute_name: str
     ) -> decimal.Decimal | str | bool | None:
         """
         Funzione per prelevare un elemento all'interno di una tabella

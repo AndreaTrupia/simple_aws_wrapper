@@ -11,6 +11,10 @@ class TestS3(unittest.TestCase):
     def setUp(self) -> None:
         AWSConfig().set_region(Region(regions.EU_WEST_1)).set_endpoint_url(
             "http://localhost:4566"
+        ).set_aws_secret_access_key("test").set_aws_access_key_id(
+            "test"
+        ).set_aws_session_token(
+            "test"
         )
         self.s3 = S3()
         self.bucket_name = f"test-bucket-{random.randint(0, 1000)}"

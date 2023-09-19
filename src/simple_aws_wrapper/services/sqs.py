@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import services
-from simple_aws_wrapper.exceptions.exceptions import MissingConfigurationException, GenericException
+from simple_aws_wrapper.exceptions.exceptions import (
+    MissingConfigurationException,
+    GenericException,
+)
 from simple_aws_wrapper.resource_manager import ResourceManager
 
 
@@ -14,16 +17,10 @@ class SQS:
     def __init__(self):
         if not AWSConfig().is_configured():
             raise MissingConfigurationException
-        self.region_name = AWSConfig().get_region_name()
-        self.endpoint_url = AWSConfig().get_endpoint_url()
-        if self.endpoint_url and self.endpoint_url != "":
-            self.client = ResourceManager.get_client(
-                services.SQS, self.region_name, self.endpoint_url
-            )
-        else:
-            self.client = ResourceManager.get_client(services.SQS, self.region_name)
+        self.client = ResourceManager.get_client(services.SQS, **AWSConfig().to_dict())
 
-    def create_message(self, **kwargs) -> dict:
+    @staticmethod
+    def create_message(**kwargs) -> dict:
         """
         Funzione per creare un dizionario a partire dai kwargs.
         Esempio di utilizzo:
