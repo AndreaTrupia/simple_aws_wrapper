@@ -185,3 +185,33 @@ class DynamoDB:
         except Exception as e:
             print(str(e))
             raise GenericException
+
+    def create_table(
+        self,
+        table_name: str,
+        key_schema: List[dict],
+        attribute_definitions: List[dict],
+        provisioned_throughput: dict,
+        **kwargs,
+    ):
+        """
+        Funzione per creare una tabella
+        :param table_name: nome tabella
+        :param key_schema: dizionario con i campi della chiave della tabella
+        :param attribute_definitions: dizionario con i campi della tabella
+        :param provisioned_throughput: dizionario con i parametri di ricerca della tabella
+        :param kwargs: argomenti variabili
+        :return: bool
+        """
+        try:
+            self.client.create_table(
+                TableName=table_name,
+                KeySchema=key_schema,
+                AttributeDefinitions=attribute_definitions,
+                ProvisionedThroughput=provisioned_throughput,
+                **kwargs,
+            )
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException

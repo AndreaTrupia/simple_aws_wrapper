@@ -14,6 +14,15 @@ class ParameterStore:
     Classe per la gestione del servizio ParameterStore di AWS
     """
 
+    class Type:
+        """
+        Classe simil-enum per la gestione dei tipi di dato all'interno dei valori del Parameter Store
+        """
+
+        STRING = "String"
+        STRING_LIST = "StringList"
+        SECURE_STRING = "SecureString"
+
     def __init__(self):
         if not AWSConfig().is_configured():
             raise MissingConfigurationException
@@ -27,15 +36,50 @@ class ParameterStore:
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
         output_dict: dict = {}
-        for parameter in parameters_list:
-            try:
-                output_dict[parameter] = self.client.get_parameters(
-                    Names=[parameter], WithDecryption=True
-                )["Parameters"][0]["Value"]
-            except:
-                print(
-                    f"Errore nel recupero della chiave {parameter} dal parameter store"
-                )
-                output_dict[parameter] = ""
-                raise GenericException
+        if len(parameters_list) == 0:
+            return {}
+        if len(parameters_list) > 10:
+            output_dict = dict(
+                output_dict,
+                **self.get_parameters_values_from_list(parameters_list[0:10]),
+            )
+            output_dict = dict(
+                output_dict,
+                **self.get_parameters_values_from_list(parameters_list[10:]),
+            )
+        else:
+            response = self.client.get_parameters(
+                Names=parameters_list, WithDecryption=True
+            )["Parameters"]
+            for parameter in response:
+                output_dict[parameter["Name"]] = parameter["Value"]
         return output_dict
+
+    def create_parameter(self, key: str, value: str, type: str, **kwargs) -> bool:
+        """
+        Funzione per la creazione di un parametro nel servizio Parameter Store
+        :param key: chiave del parametro da creare
+        :param value: valore del parametro da creare
+        :param type: tipo del parametro da creare
+        :param kwargs: opzionali
+        :return: None
+        """
+        try:
+            self.client.put_parameter(Name=key, Value=value, Type=type, **kwargs)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
+
+    def delete_parameter(self, key: str) -> bool:
+        """
+        Funzione per la cancellazione di un parametro dal servizio Parameter Store
+        :param key: chiave del parametro da eliminare
+        :return: None
+        """
+        try:
+            self.client.delete_parameter(Name=key)
+            return True
+        except Exception as e:
+            print(str(e))
+            raise GenericException
