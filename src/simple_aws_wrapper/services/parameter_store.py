@@ -35,25 +35,30 @@ class ParameterStore:
         :param parameters_list: lista dei nomi dei parametri di cui recuperare il valore
         :return: dizionario {"<nome_parametro>": "<valore_parametro>"}
         """
-        output_dict: dict = {}
-        if len(parameters_list) == 0:
-            return {}
-        if len(parameters_list) > 10:
-            output_dict = dict(
-                output_dict,
-                **self.get_parameters_values_from_list(parameters_list[0:10]),
-            )
-            output_dict = dict(
-                output_dict,
-                **self.get_parameters_values_from_list(parameters_list[10:]),
-            )
-        else:
-            response = self.client.get_parameters(
-                Names=parameters_list, WithDecryption=True
-            )["Parameters"]
-            for parameter in response:
-                output_dict[parameter["Name"]] = parameter["Value"]
-        return output_dict
+        try:
+            output_dict: dict = {}
+            if len(parameters_list) == 0:
+                return {}
+            if len(parameters_list) > 10:
+                output_dict = dict(
+                    output_dict,
+                    **self.get_parameters_values_from_list(parameters_list[0:10]),
+                )
+                output_dict = dict(
+                    output_dict,
+                    **self.get_parameters_values_from_list(parameters_list[10:]),
+                )
+            else:
+                print(f"Attempting to retrieve following parameters from Parameter Store:{parameters_list}")
+                response = self.client.get_parameters(
+                    Names=parameters_list, WithDecryption=True
+                )["Parameters"]
+                for parameter in response:
+                    output_dict[parameter["Name"]] = parameter["Value"]
+            return output_dict
+        except Exception as e:
+            print("Error retrieving parameters from Parameter Store")
+            raise GenericException(str(e)) from e
 
     def create_parameter(self, key: str, value: str, type: str, **kwargs) -> bool:
         """
