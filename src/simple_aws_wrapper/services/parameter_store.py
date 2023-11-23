@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import services
 from simple_aws_wrapper.exceptions.exceptions import (
@@ -56,9 +58,8 @@ class ParameterStore:
                 for parameter in response:
                     output_dict[parameter["Name"]] = parameter["Value"]
             return output_dict
-        except Exception as e:
-            print("Error retrieving parameters from Parameter Store")
-            raise GenericException(str(e)) from e
+        except Exception:
+            raise GenericException("Error retrieving parameters from Parameter Store. \n" + traceback.format_exc())
 
     def create_parameter(self, key: str, value: str, type: str, **kwargs) -> bool:
         """
@@ -72,9 +73,8 @@ class ParameterStore:
         try:
             self.client.put_parameter(Name=key, Value=value, Type=type, **kwargs)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def delete_parameter(self, key: str) -> bool:
         """
@@ -85,6 +85,5 @@ class ParameterStore:
         try:
             self.client.delete_parameter(Name=key)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())

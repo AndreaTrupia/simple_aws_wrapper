@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import decimal
+import traceback
 from typing import List
 
 from simple_aws_wrapper.config import AWSConfig
@@ -32,9 +33,8 @@ class DynamoDB:
         """
         try:
             return self.client.Table(table_name)
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def get_record(self, table_name: str, key: dict):
         """
@@ -48,9 +48,8 @@ class DynamoDB:
             if "Item" not in output:
                 return None
             return output
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def put_item(self, table_name: str, item: dict) -> bool:
         """
@@ -62,11 +61,10 @@ class DynamoDB:
         try:
             self.__get_table_resource(table_name).put_item(Item=item)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
-    def scan_table(self, table_name: str) -> List[dict]:
+    def scan_table(self, table_name: str) -> dict:
         """
         Funzione per prelevare tutti gli elementi all'interno di una tabella
         :param table_name: nome tabella
@@ -75,16 +73,15 @@ class DynamoDB:
         """
         try:
             return self.__get_table_resource(table_name).scan()
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def update_item(
-        self,
-        table_name: str,
-        key: dict,
-        update_expression: str,
-        expression_attribute_values: dict,
+            self,
+            table_name: str,
+            key: dict,
+            update_expression: str,
+            expression_attribute_values: dict,
     ) -> bool:
         """
         Funzione per aggiornare un elemento all'interno di una tabella
@@ -101,9 +98,8 @@ class DynamoDB:
                 ExpressionAttributeValues=expression_attribute_values,
             )
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def get_item(self, table_name: str, key: dict) -> dict | None:
         """
@@ -120,12 +116,11 @@ class DynamoDB:
         except KeyError as ke:
             print("Record not found")
             return None
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def get_item_value(
-        self, table_name: str, key: dict, attribute_name: str
+            self, table_name: str, key: dict, attribute_name: str
     ) -> decimal.Decimal | str | bool | None:
         """
         Funzione per prelevare un elemento all'interno di una tabella
@@ -143,9 +138,8 @@ class DynamoDB:
         except KeyError as ke:
             print(f'Record has no attribute "{attribute_name}"')
             return None
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def key_exists(self, table_name: str, key: dict) -> bool:
         """
@@ -155,10 +149,9 @@ class DynamoDB:
         :return: Booleano che indica se l'elemento esiste o meno
         """
         try:
-            return self.get_record(table_name, key)["Item"] is not None
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+            return self.get_record(table_name, key) is not None and "Item" in self.get_record(table_name, key)
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def delete_item(self, table_name: str, key: dict) -> bool:
         """
@@ -170,9 +163,8 @@ class DynamoDB:
         try:
             self.__get_table_resource(table_name).delete_item(Key=key)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def load(self, table_name: str):
         """
@@ -182,17 +174,16 @@ class DynamoDB:
         """
         try:
             return self.__get_table_resource(table_name).load()
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def create_table(
-        self,
-        table_name: str,
-        key_schema: List[dict],
-        attribute_definitions: List[dict],
-        provisioned_throughput: dict,
-        **kwargs,
+            self,
+            table_name: str,
+            key_schema: List[dict],
+            attribute_definitions: List[dict],
+            provisioned_throughput: dict,
+            **kwargs,
     ):
         """
         Funzione per creare una tabella
@@ -212,6 +203,17 @@ class DynamoDB:
                 **kwargs,
             )
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
+
+    def delete_table(self, table_name: str) -> bool:
+        """
+        Funzione per cancellare una tabella
+        :param table_name: nome tabella
+        :return: True se cancellazione va a buon fine
+        """
+        try:
+            self.__get_table_resource(table_name).delete()
+            return True
+        except Exception:
+            raise GenericException(traceback.format_exc())

@@ -1,3 +1,5 @@
+import traceback
+
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.exceptions.exceptions import (
     MissingConfigurationException,
@@ -39,6 +41,5 @@ class Lambda:
                 Payload=payload,
                 **kwargs
             )
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())

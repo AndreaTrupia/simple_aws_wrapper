@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import sys
+import traceback
+
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import services, regions
 from simple_aws_wrapper.exceptions.exceptions import (
@@ -35,9 +38,8 @@ class S3:
         try:
             self.client.put_object(Body=body, Bucket=bucket_name, Key=object_key)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def get_file_content(self, bucket_name: str, object_key: str) -> bytes:
         """
@@ -48,10 +50,9 @@ class S3:
         """
         try:
             file = self.client.get_object(Bucket=bucket_name, Key=object_key)
-            file_content = file["Body"].read()
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+            file_content = file["Bodys"].read()
+        except Exception:
+            raise GenericException(traceback.format_exc())
         return file_content
 
     def get_str_file_content(self, bucket_name: str, object_key: str) -> str:
@@ -63,9 +64,8 @@ class S3:
         """
         try:
             return self.get_file_content(bucket_name, object_key).decode("utf-8")
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def copy_object(
         self,
@@ -92,9 +92,8 @@ class S3:
                 CopySource={"Bucket": bucket_name, "Key": object_key},
             )
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def delete_object(self, bucket_name: str, object_key: str) -> bool:
         """
@@ -106,9 +105,8 @@ class S3:
         try:
             self.client.delete_object(Bucket=bucket_name, Key=object_key)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def move_object(
         self,
@@ -134,9 +132,8 @@ class S3:
             )
             self.delete_object(bucket_name, object_key)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def create_bucket(self, bucket_name: str, **kwargs):
         """
@@ -152,9 +149,8 @@ class S3:
                 }
             self.client.create_bucket(Bucket=bucket_name, **kwargs)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def delete_bucket(self, bucket_name: str):
         """
@@ -165,6 +161,5 @@ class S3:
         try:
             self.client.delete_bucket(Bucket=bucket_name)
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())

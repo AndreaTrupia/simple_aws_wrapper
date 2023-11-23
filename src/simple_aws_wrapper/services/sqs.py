@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 from simple_aws_wrapper.config import AWSConfig
 from simple_aws_wrapper.const import services
 from simple_aws_wrapper.exceptions.exceptions import (
@@ -52,6 +54,5 @@ class SQS:
                 MessageBody=message_body,
             )
             return True
-        except Exception as e:
-            print(str(e))
-            raise GenericException
+        except Exception:
+            raise GenericException(traceback.format_exc())
