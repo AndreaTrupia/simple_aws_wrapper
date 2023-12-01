@@ -50,7 +50,7 @@ class S3:
         """
         try:
             file = self.client.get_object(Bucket=bucket_name, Key=object_key)
-            file_content = file["Bodys"].read()
+            file_content = file["Body"].read()
         except Exception:
             raise GenericException(traceback.format_exc())
         return file_content

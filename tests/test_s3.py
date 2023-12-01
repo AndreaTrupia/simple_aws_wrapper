@@ -78,3 +78,15 @@ class TestS3(unittest.TestCase):
         self.s3.delete_object(self.destination_bucket_name, self.destination_object_key)
         self.s3.delete_bucket(self.bucket_name)
         self.s3.delete_bucket(self.destination_bucket_name)
+
+    def test_get_file_content(self):
+        self.s3.create_bucket(self.bucket_name)
+        self.s3.put_object(
+            self.test_string, bucket_name=self.bucket_name, object_key=self.object_key
+        )
+        file_content: bytes = self.s3.get_file_content(
+            self.bucket_name, self.object_key
+        )
+        self.assertEqual(file_content, self.test_string.encode())
+        self.s3.delete_object(self.bucket_name, self.object_key)
+        self.s3.delete_bucket(self.bucket_name)

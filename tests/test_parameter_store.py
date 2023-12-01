@@ -31,7 +31,7 @@ class TestParameterStore(TestCase):
             self.parameter_store.get_parameters_values_from_list(key_list),
         )
         for i in range(N):
-            self.parameter_store.delete_parameter(f"/{str(i)}/{str(i)}")
+            self.assertTrue(self.parameter_store.delete_parameter(f"/{str(i)}/{str(i)}"))
 
     def test_create_and_delete_parameter(self):
         self.assertTrue(
