@@ -90,3 +90,9 @@ class TestS3(unittest.TestCase):
         self.assertEqual(file_content, self.test_string.encode())
         self.s3.delete_object(self.bucket_name, self.object_key)
         self.s3.delete_bucket(self.bucket_name)
+
+    def test_bucket_exists(self):
+        self.s3.create_bucket(self.bucket_name)
+        self.assertTrue(self.s3.bucket_exists(self.bucket_name))
+        self.s3.delete_bucket(self.bucket_name)
+        self.assertFalse(self.s3.bucket_exists(self.bucket_name))

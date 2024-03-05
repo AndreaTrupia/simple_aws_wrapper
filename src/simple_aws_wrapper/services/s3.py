@@ -163,3 +163,10 @@ class S3:
             return True
         except Exception:
             raise GenericException(traceback.format_exc())
+
+    def bucket_exists(self, bucket_name: str) -> bool:
+        try:
+            self.client.head_bucket(Bucket=bucket_name)
+            return True
+        except Exception:
+            return False
