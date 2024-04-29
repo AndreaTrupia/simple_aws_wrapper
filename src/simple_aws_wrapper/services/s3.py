@@ -179,4 +179,4 @@ class S3:
                 output_list.append(object["Key"])
             return output_list
         except Exception:
-            return []
+            raise GenericException(traceback.format_exc())
