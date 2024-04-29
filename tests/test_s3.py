@@ -20,6 +20,7 @@ class TestS3(unittest.TestCase):
         self.bucket_name = f"test-bucket-{random.randint(0, 1000)}"
         self.test_string: str = "Hello World!"
         self.object_key = "test.txt"
+        self.object_key_for_listing = "test2.txt"
         self.destination_bucket_name = f"test-bucket-{random.randint(0, 1000)}"
         self.destination_object_key = "test-destination.txt"
 
@@ -96,3 +97,10 @@ class TestS3(unittest.TestCase):
         self.assertTrue(self.s3.bucket_exists(self.bucket_name))
         self.s3.delete_bucket(self.bucket_name)
         self.assertFalse(self.s3.bucket_exists(self.bucket_name))
+
+    def test_list_objects(self):
+        self.s3.create_bucket(self.bucket_name)
+        self.s3.put_object(self.test_string, bucket_name=self.bucket_name, object_key=self.object_key)
+        self.s3.put_object(self.test_string, bucket_name=self.bucket_name, object_key=self.object_key_for_listing)
+        object_key_list: list[str] = self.s3.list_object_keys(self.bucket_name)
+        self.assertTrue(self.object_key in object_key_list and self.object_key_for_listing in object_key_list)

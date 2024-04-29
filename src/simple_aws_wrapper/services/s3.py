@@ -170,3 +170,13 @@ class S3:
             return True
         except Exception:
             return False
+
+    def list_object_keys(self, bucket_name: str) -> list[str]:
+        try:
+            result = self.client.list_objects(Bucket=bucket_name, Delimiter='/')
+            output_list: list[str] = []
+            for object in result["Contents"]:
+                output_list.append(object["Key"])
+            return output_list
+        except Exception:
+            return []

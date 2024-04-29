@@ -32,8 +32,8 @@ class AWSConfig:
         Imposta la regione in cui si vuole utilizzare il ResourceManager
         :param region: regione in cui si vuole utilizzare il ResourceManager
         """
-        if not isinstance(region, Region):
-            raise TypeError("region must be a Region")
+        if not isinstance(region, Region) and isinstance(region, str):
+            region = Region(region)
         if region == "":
             raise ValueError("region cannot be empty")
         self.__region = region
