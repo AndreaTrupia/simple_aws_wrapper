@@ -26,7 +26,7 @@ s3 = S3()
 ``
 
 ``
-message_content=b'Hello World!'
+message_content='Hello World!'
 ``
 
 ``
