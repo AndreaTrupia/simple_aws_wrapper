@@ -24,6 +24,9 @@ class DynamoDB:
         self.client = ResourceManager.get_resource(
             services.DYNAMO_DB, **AWSConfig().to_dict()
         )
+        self.__dynamodb = ResourceManager.get_client(
+            services.DYNAMO_DB, **AWSConfig().to_dict()
+        )
 
     def __get_table_resource(self, table_name: str):
         """
@@ -77,11 +80,11 @@ class DynamoDB:
             raise GenericException(traceback.format_exc())
 
     def update_item(
-            self,
-            table_name: str,
-            key: dict,
-            update_expression: str,
-            expression_attribute_values: dict,
+        self,
+        table_name: str,
+        key: dict,
+        update_expression: str,
+        expression_attribute_values: dict,
     ) -> bool:
         """
         Funzione per aggiornare un elemento all'interno di una tabella
@@ -120,7 +123,7 @@ class DynamoDB:
             raise GenericException(traceback.format_exc())
 
     def get_item_value(
-            self, table_name: str, key: dict, attribute_name: str
+        self, table_name: str, key: dict, attribute_name: str
     ) -> decimal.Decimal | str | bool | None:
         """
         Funzione per prelevare un elemento all'interno di una tabella
@@ -149,7 +152,9 @@ class DynamoDB:
         :return: Booleano che indica se l'elemento esiste o meno
         """
         try:
-            return self.get_record(table_name, key) is not None and "Item" in self.get_record(table_name, key)
+            return self.get_record(
+                table_name, key
+            ) is not None and "Item" in self.get_record(table_name, key)
         except Exception:
             raise GenericException(traceback.format_exc())
 
@@ -178,12 +183,12 @@ class DynamoDB:
             raise GenericException(traceback.format_exc())
 
     def create_table(
-            self,
-            table_name: str,
-            key_schema: List[dict],
-            attribute_definitions: List[dict],
-            provisioned_throughput: dict,
-            **kwargs,
+        self,
+        table_name: str,
+        key_schema: List[dict],
+        attribute_definitions: List[dict],
+        provisioned_throughput: dict,
+        **kwargs,
     ):
         """
         Funzione per creare una tabella
@@ -217,3 +222,28 @@ class DynamoDB:
             return True
         except Exception:
             raise GenericException(traceback.format_exc())
+
+    def scan_filter_elements(
+        self, table_name: str, column_name: str, value: any, type: str
+    ) -> list[dict] | None:
+        response = self.__dynamodb.scan(
+            TableName=table_name,
+            FilterExpression=f"{column_name} = :val",
+            ExpressionAttributeValues={":val": {type: value}},
+        )
+        output_list: list[dict] = []
+        items = response.get("Items", [])
+        output_list.extend(items)
+        while "LastEvaluatedKey" in response:
+            response = self.__dynamodb.scan(
+                TableName=table_name,
+                FilterExpression=f"{column_name} = :val",
+                ExpressionAttributeValues={":val": {type: value}},
+                ExclusiveStartKey=response["LastEvaluatedKey"],
+            )
+            items = response.get("Items", [])
+            output_list.extend(items)
+        for item in output_list:
+            for k, v in item.items():
+                item[k] = list(v.values())[0]
+        return output_list
