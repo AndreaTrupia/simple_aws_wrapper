@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import traceback
 
 from simple_aws_wrapper.config import AWSConfig
@@ -36,6 +37,23 @@ class SQS:
         for k in kwargs.keys():
             output_dict[k] = kwargs[k]
         return output_dict
+
+    def send_json_message(self, queue_name: str, message_body: dict) -> bool:
+        """
+        Funzione per inviare un messaggio json (dict) verso una coda
+        :param queue_name: nome della coda
+        :param message_body: corpo del messaggio
+        :return: bool
+        """
+        try:
+            queue_url = self.client.get_queue_url(QueueName=queue_name)["QueueUrl"]
+            self.client.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps(message_body),
+            )
+            return True
+        except Exception:
+            raise GenericException(traceback.format_exc())
 
     def send_message(self, queue_name: str, message_body: str | dict) -> bool:
         """
